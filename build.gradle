@@ -35,6 +35,8 @@ dependencies {
     compile "org.projectlombok:lombok:1.16.2"
     // JDK++
     compile 'com.google.guava:guava:18.0'
+    // logging
+    compile 'org.slf4j:slf4j-api:1.7.10'
 
     // test support
     testCompile "org.slf4j:slf4j-simple:1.7.10"
