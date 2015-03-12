@@ -8,4 +8,8 @@ We recommend using Lombok to easily create immutable objects in Java using @Requ
 
 http://projectlombok.org/features/Constructor.html
 
+# License
+
+This software is licensed under the BSD license.
+
 
