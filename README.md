@@ -1,4 +1,5 @@
 # immutizer4j
+
 Library to validate immutability of Java object graphs
 
 This library can validate an entire Java object graph and verify all of its elements are truly immutable.
