@@ -10,6 +10,8 @@ import java.lang.reflect.Modifier;
 import java.util.Set;
 import java.util.concurrent.ConcurrentMap;
 
+import static org.immutizer4j.ImmutizerConstants.*;
+
 /**
  * Performs object graph check for immutability
  *
@@ -55,14 +57,15 @@ public class Immutizer {
             // all good, we verified this type before
             return;
         } else {
-            performValidation(entity);
+            performValidation(entity, ThreadLocals.STRINGBUILDER.get()
+                    .append(entity.getSimpleName()));
             //remember that it was fine
             validationCache.putIfAbsent(entity,null);
         }
     }
 
     // performs actual walk down the graph hierarchy
-    private void performValidation(Class<?> entity) {
+    private void performValidation(Class<?> entity, StringBuilder currentPath) {
         Class<?> current = entity;
         while (current != null) {
 

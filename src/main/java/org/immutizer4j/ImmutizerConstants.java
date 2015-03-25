@@ -13,6 +13,11 @@ import java.util.Set;
 class ImmutizerConstants {
 
     /**
+     * Used when keeping track of path in an object graph
+     */
+    public static final String HIERARCHY_SEPARATOR = "/";
+
+    /**
      * Types the immutizer recognizes by default as immutable (if flagged as final)
      */
     static Set<Class<?>> KNOWN_TYPES =
