@@ -1,5 +1,6 @@
 package org.immutizer4j;
 
+import com.sun.org.apache.bcel.internal.generic.ICONST;
 import lombok.Value;
 
 import java.lang.reflect.Field;
@@ -11,7 +12,19 @@ import java.lang.reflect.Field;
  */
 @Value
 public class ValidationError {
+
     private Class<?> type;
-    private Field field;
+    private String fieldName;
     private ViolationType violationType;
+
+    @Override
+    public String toString() {
+        return ThreadLocals.STRINGBUILDER.get()
+                .append(type.getName())
+                .append(ImmutizerConstants.FIELD_SEPARATOR)
+                .append(fieldName)
+                .append(ImmutizerConstants.MSG_SEPARATOR)
+                .append(violationType)
+                .toString();
+    }
 }

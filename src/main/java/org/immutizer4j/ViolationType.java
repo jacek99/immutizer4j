@@ -6,6 +6,6 @@ package org.immutizer4j;
  * @author Jacek Furmankiewicz
  */
 public enum ViolationType {
-    FIELD_NOT_FINAL,
+    NON_FINAL_FIELD,
     MUTABLE_TYPE
 }

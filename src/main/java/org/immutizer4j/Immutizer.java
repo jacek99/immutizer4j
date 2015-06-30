@@ -5,11 +5,9 @@ import com.google.common.collect.MapMaker;
 import com.google.common.collect.Sets;
 import lombok.extern.slf4j.Slf4j;
 
+import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.ConcurrentMap;
 
@@ -77,7 +75,7 @@ public class Immutizer {
             }
 
             // move up the class hierarchy level
-            current = entity.getSuperclass();
+            current = current.getSuperclass();
         }
 
         return result;
@@ -87,8 +85,19 @@ public class Immutizer {
     private void validateField(Field field, ValidationResult result) {
 
         // basic final check
-        if (!Modifier.isFinal(field.getModifiers())){
-            result.getErrors().add(new ValidationError(field.getDeclaringClass(), field, ViolationType.FIELD_NOT_FINAL));
+        if (!Modifier.isStatic(field.getModifiers()) && !Modifier.isFinal(field.getModifiers())){
+            log.error("Found mutable field {}.{}",field.getDeclaringClass().getSimpleName(),field.getName());
+            result.getErrors().add(new ValidationError(field.getDeclaringClass(), field.getName(), ViolationType.NON_FINAL_FIELD));
+        }
+
+        // check its own fields, if any
+        for(Field childField : field.getType().getDeclaredFields()) {
+            if (!Modifier.isStatic(childField.getModifiers())
+                    && !childField.getType().isPrimitive()
+                    && !ImmutizerConstants.KNOWN_TYPES.contains(childField.getType())) {
+                log.debug("Validating {}.{}", childField.getDeclaringClass().getSimpleName(), childField.getName());
+                validateField(childField, result);
+            }
         }
 
 //        // check for mutable types
