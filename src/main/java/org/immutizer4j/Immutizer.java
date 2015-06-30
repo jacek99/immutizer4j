@@ -7,10 +7,11 @@ import lombok.extern.slf4j.Slf4j;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
+import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.ConcurrentMap;
-
-import static org.immutizer4j.ImmutizerConstants.*;
 
 /**
  * Performs object graph check for immutability
@@ -23,7 +24,7 @@ public class Immutizer {
     // additional types that we were told are immutable
     private final Set<Class<?>> safeTypes;
 
-    private static final ConcurrentMap<Class<?>,Void> validationCache =
+    private static final ConcurrentMap<Class<?>,ValidationResult> validationCache =
             new MapMaker()
             .concurrencyLevel(Runtime.getRuntime().availableProcessors())
             .initialCapacity(100)
@@ -48,58 +49,65 @@ public class Immutizer {
      * Performs type validation for immutability across the entire object graph
      * Results are cached, so the overhead of the reflection scar are incurred
      * only once
-     * @param entity Entity to check
+     * @param clazz Entity to check
      * @return Validation result
-     * @throws ImmutabilityViolationException
      */
-    public void verify(Class<?> entity) {
-        if (validationCache.containsKey(entity)) {
+    public ValidationResult verify(Class<?> clazz) {
+        if (validationCache.containsKey(clazz)) {
             // all good, we verified this type before
-            return;
+            return validationCache.get(clazz);
         } else {
-            performValidation(entity, ThreadLocals.STRINGBUILDER.get()
-                    .append(entity.getSimpleName()));
+            ValidationResult result = performValidation(clazz, ThreadLocals.STRINGBUILDER.get()
+                    .append(clazz.getSimpleName()));
             //remember that it was fine
-            validationCache.putIfAbsent(entity,null);
+            validationCache.putIfAbsent(clazz,result);
+            return result;
         }
     }
 
     // performs actual walk down the graph hierarchy
-    private void performValidation(Class<?> entity, StringBuilder currentPath) {
+    private ValidationResult performValidation(Class<?> entity, StringBuilder currentPath) {
         Class<?> current = entity;
-        while (current != null) {
+        ValidationResult result = new ValidationResult();
+        while (current != null && !current.equals(Object.class)) {
 
-            Field[] fields = entity.getDeclaredFields();
+            Field[] fields = current.getDeclaredFields();
             for(Field field : fields) {
-                validateField(field);
+                validateField(field, result);
             }
 
             // move up the class hierarchy level
             current = entity.getSuperclass();
         }
+
+        return result;
     }
 
     // performs all the validations for a single field
-    private void validateField(Field field) {
+    private void validateField(Field field, ValidationResult result) {
 
         // basic final check
         if (!Modifier.isFinal(field.getModifiers())){
-            throw new ImmutabilityViolationException(field.getDeclaringClass(),field,ViolationReason.FIELD_NOT_FINAL);
+            result.getErrors().add(new ValidationError(field.getDeclaringClass(), field, ViolationType.FIELD_NOT_FINAL));
         }
 
-        // check for mutable types
-        if (!safeTypes.contains(field.getType())) {
-
-            // it's not in the list of concrete types, but maybe assignable t o
-            if (!isSafeType(field)) {
-
-                // type is not in the list of known immutable types
-                // however it can be automatically recognized as immutable if it is final (which it is by this point)
-                // and all of its fields are immutable
-
-                performValidation(field.getType());
-            }
-        }
+//        // check for mutable types
+//        if (!safeTypes.contains(field.getType())) {
+//
+//            // it's not in the list of concrete types, but maybe assignable to it
+//            if (!isSafeType(field)) {
+//
+//                // type is not in the list of known immutable types
+//                // however it can be automatically recognized as immutable if it is final (which it is by this point)
+//                // and all of its fields are immutable
+//
+//                performValidation(field.getType());
+//            } else {
+//
+//            }
+//        }
+//
+//        return Optional.empty();
     }
 
     // validates if the field type can be safely assigned to any of the

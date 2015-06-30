@@ -13,5 +13,5 @@ import java.lang.reflect.Field;
 public class ValidationError {
     private Class<?> type;
     private Field field;
-    private ViolationReason reason;
+    private ViolationType violationType;
 }

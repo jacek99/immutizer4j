@@ -5,7 +5,7 @@ package org.immutizer4j;
  *
  * @author Jacek Furmankiewicz
  */
-public enum ViolationReason {
+public enum ViolationType {
     FIELD_NOT_FINAL,
     MUTABLE_TYPE
 }
