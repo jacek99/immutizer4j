@@ -29,8 +29,7 @@ public class BaseTests {
         assertTrue(result.toString(),result.toString().contains("org.immutizer4j.test.sample.NonFinalFieldsPojo.testString : NON_FINAL_FIELD"));
         assertTrue(result.toString(),result.toString().contains("org.immutizer4j.test.sample.NonFinalFieldsPojo.testDouble : NON_FINAL_FIELD"));
         assertTrue(result.toString(),result.toString().contains("org.immutizer4j.test.sample.NonFinalFieldsPojo.testDbl : NON_FINAL_FIELD"));
-
-    }
+   }
 
     @Test
     public void testFinalObjectWithNonFinalFields() {
@@ -55,7 +54,6 @@ public class BaseTests {
         assertEquals(1, result.getErrors().size());
 
         assertEquals("org.immutizer4j.test.sample.MutableCollectionPojo.listInt : MUTABLE_TYPE", result.toString());
-
     }
 
     @Test
@@ -64,6 +62,7 @@ public class BaseTests {
 
         // should be fine,  no errors
         assertEquals(true,result.isValid());
+        assertEquals("OK",result.toString());
     }
 
 }

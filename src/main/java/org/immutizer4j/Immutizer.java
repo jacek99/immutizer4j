@@ -90,16 +90,12 @@ public class Immutizer {
 
             // basic final check
             if (!Modifier.isFinal(field.getModifiers())){
-                ValidationError error = new ValidationError(field.getDeclaringClass(), field.getName(), ViolationType.NON_FINAL_FIELD);
-                log.error("Immutability violation: {}",error);
-                result.getErrors().add(error);
+                addError(field, ViolationType.NON_FINAL_FIELD, result);
             }
 
             // collections
             if (Collection.class.isAssignableFrom(field.getType()) && !isSafeType(field)) {
-                ValidationError error = new ValidationError(field.getDeclaringClass(), field.getName(), ViolationType.MUTABLE_TYPE);
-                log.error("Immutability violation: {}",error);
-                result.getErrors().add(error);
+                addError(field, ViolationType.MUTABLE_TYPE, result);
             }
 
             // for custom types, recursively check its own fields
@@ -123,6 +119,13 @@ public class Immutizer {
             }
         }
         return false;
+    }
+
+    // standard handler for reporting errors
+    private void addError(Field field, ViolationType violationType, ValidationResult result) {
+        ValidationError error = new ValidationError(field.getDeclaringClass(), field.getName(), violationType);
+        log.error("Immutability violation: {}",error);
+        result.getErrors().add(error);
     }
 
 }
