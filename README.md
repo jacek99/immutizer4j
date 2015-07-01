@@ -71,6 +71,11 @@ We recommend using **Lombok** to easily create immutable objects in Java using *
 
 It is used throughout this project for any immutable POJOs. 
 
+# Dependencies
+
+* SLF4J API: MIT License <http://slf4j.org/license.html>
+* Google Guava: Apache license <https://github.com/google/guava/blob/master/CONTRIBUTING.md>
+
 # License
 
 This software is licensed under the BSD license.
