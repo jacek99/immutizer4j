@@ -3,7 +3,7 @@ package org.immutizer4j.test.sample;
 import lombok.Data;
 
 @Data
-public class NonFinalFields {
+public class NonFinalFieldsPojo {
     private int testInt;
     private Integer testInteger;
     private String testString;
