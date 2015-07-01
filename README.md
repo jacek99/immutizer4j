@@ -13,7 +13,7 @@ library than Guava).
 Use this whenever you do have shared state (e.g. in-memory caches in ConcurrentHashMap) and you want to avoid
 the **mutable** part of the *mutable shared state* sin.
 
-Another good use case is for objects that are passed as messages in JVM actor frameworks, such as Akka, Lois, etc.
+Another good use case is for objects that are passed as messages between threads in JVM actor frameworks, such as Akka, Lois, etc.
 
 # Usage
 
