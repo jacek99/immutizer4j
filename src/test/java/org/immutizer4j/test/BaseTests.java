@@ -6,6 +6,7 @@ import com.sun.javafx.geom.transform.Identity;
 import org.immutizer4j.Immutizer;
 import org.immutizer4j.ValidationResult;
 import org.immutizer4j.test.sample.FinalParentWithNonFinalFields;
+import org.immutizer4j.test.sample.ImmutableCollection;
 import org.immutizer4j.test.sample.MutableCollection;
 import org.immutizer4j.test.sample.NonFinalFields;
 import org.junit.Test;
@@ -53,11 +54,19 @@ public class BaseTests {
     public void testFinalMutableCollection() {
         ValidationResult result = defaultImmutizer.verify(MutableCollection.class);
 
-        assertEquals(false,result.isValid());
+        assertEquals(false, result.isValid());
         assertEquals(1, result.getErrors().size());
 
         assertEquals("org.immutizer4j.test.sample.MutableCollection.listInt : MUTABLE_TYPE", result.toString());
 
+    }
+
+    @Test
+    public void testFinalImmutableCollection() {
+        ValidationResult result = defaultImmutizer.verify(ImmutableCollection.class);
+
+        // should be fine,  no errors
+        assertEquals(true,result.isValid());
     }
 
 }
