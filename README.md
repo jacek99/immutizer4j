@@ -88,7 +88,6 @@ This software is licensed under the BSD license.
 
 # TODO Items
 
-* handle checking of types within a collection (to deal with type erasure in Java generics)
 * treat arrays as warnings (or optionally be strict and disallow them altogether)
 
 
