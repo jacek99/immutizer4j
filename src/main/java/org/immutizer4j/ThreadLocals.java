@@ -3,7 +3,7 @@ package org.immutizer4j;
 import java.util.StringJoiner;
 
 /**
- * Varous thread local variables for max performance
+ * Internal thread local variables for max performance
  *
  * @author Jacek Furmankiewicz
  */

@@ -28,8 +28,7 @@ public class ValidationResult {
     };
 
     /**
-     * Creates a new immutable instance that merges existing errors
-     * with the new one
+     * Creates a new immutable instance that merges existing errors with the new one
      */
     public ValidationResult addError(ValidationError error) {
         ImmutableSet<ValidationError> newErrors = ImmutableSet.<ValidationError>builder()

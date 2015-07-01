@@ -1,23 +1,64 @@
 # immutizer4j
 
-Library to validate immutability of Java object graphs
+A small library to validate immutability of Java object graphs
 
 This library can validate an entire Java object graph and verify all of its elements are truly immutable.
 To be immutable all fields must be final and the only collections allowed are Google Guava Immutable Collections.
 
+It can be extended with custom types that you can flag as immutable (e.g. a different immutable collection
+library than Guava).
+
+# Use cases
+
+Use this whenever you do have shared state (e.g. in-memory caches in ConcurrentHashMap) and you want to avoid
+the **mutable** part of the *mutable shared state* sin.
+
+Another good use case is for objects that are passed as messages in JVM actor frameworks, such as Akka, Lois, etc.
+
 # Usage
 
-TODO
+You need to create an instance of *Immutizer* and store it in a static variable. You have the option of adding
+additional custom types to the whitelist of object types if necessary at that time (see further down).
+
+```java
+private final static Immutizer immutizer = new Immutizer();
+
+// verify the type of an object instance
+immutizer.verify(instance);
+
+// verify the type of an object
+immutizer.verify(MyPojo.class);
+
+// get the validation result without throwing an exception
+ValidationResult result = immutizer.getValidationResult(MyPojo.class);
+```
+
+That's it.    
 
 # Adding custom immutable types
 
-TODO
+You can add additional types that Immutizer will treat as immutable directly in the constructor:
+
+```java
+private final static Immutizer immutizer = new Immutizer(MyCustomImmutableCollection.class);
+```
+
+But honestly, you should probably just look at Guava immutable collections, they should cover all reasonable
+use cases: <https://github.com/google/guava/wiki/ImmutableCollectionsExplained>.
+
+
+# Performance
+
+Any type is validated only once. Each subsequent request returns a cached *immutable* (of course) validation result.
+Therefore, overhead should be non-existant.
 
 # Creating immutable classes with Lombok
 
 We recommend using **Lombok** to easily create immutable objects in Java using **@Value**:
 
 <http://projectlombok.org/features/Value.html>
+
+That is what is used throughout this project for any immutable POJOs. 
 
 # License
 
