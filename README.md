@@ -53,7 +53,7 @@ exception on startup.
 
 Or add it within your JUnit tests for every single object type that is cached in memory, passed as a message, etc.
 
-# Adding custom immutable types
+## Adding custom immutable types
 
 You can add additional types that Immutizer will treat as immutable directly in the constructor:
 
