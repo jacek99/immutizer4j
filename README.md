@@ -10,6 +10,13 @@ library than Guava).
 
 **Requires Java 8.**
 
+# Functionality
+
+* walks down the entire object graph
+* ensures all fields in every type are final
+* ensures only immutable collections are used
+* ensures only immutable types are stored within collections (yes, it works around generics type erasure)
+
 # Use cases
 
 Use this whenever you do have shared state (e.g. in-memory caches in ConcurrentHashMap) and you want to avoid
