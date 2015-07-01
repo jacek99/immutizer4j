@@ -1,7 +1,7 @@
 package org.immutizer4j;
 
-import lombok.Getter;
-import lombok.ToString;
+import com.google.common.collect.ImmutableSet;
+import lombok.*;
 
 import java.util.LinkedHashSet;
 import java.util.Set;
@@ -12,12 +12,12 @@ import java.util.stream.Collectors;
  *
  * @author Jacek Furmankiewicz
  */
+@Value
 public class ValidationResult {
 
     private static final String OK = "OK";
 
-    @Getter
-    private final Set<ValidationError> errors = new LinkedHashSet<>();
+    private ImmutableSet<ValidationError> errors;
 
     /**
      * Returns if the validation passed or not
@@ -27,6 +27,18 @@ public class ValidationResult {
         return errors.isEmpty();
     };
 
+    /**
+     * Creates a new immutable instance that merges existing errors
+     * with the new one
+     */
+    public ValidationResult addError(ValidationError error) {
+        ImmutableSet<ValidationError> newErrors = ImmutableSet.<ValidationError>builder()
+                .addAll(errors)
+                .add(error)
+                .build();
+
+        return new ValidationResult(newErrors);
+    }
 
     @Override
     public String toString() {
@@ -38,4 +50,5 @@ public class ValidationResult {
                     .collect(Collectors.joining("\n"));
         }
     }
+
 }

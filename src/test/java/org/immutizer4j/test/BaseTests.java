@@ -19,7 +19,7 @@ public class BaseTests {
 
     @Test
     public void testNonFinalFields() {
-        ValidationResult result = defaultImmutizer.verify(NonFinalFieldsPojo.class);
+        ValidationResult result = defaultImmutizer.getValidationResult(NonFinalFieldsPojo.class);
 
         // we should have gotten 5 errors
         assertEquals(false, result.isValid());
@@ -33,7 +33,7 @@ public class BaseTests {
 
     @Test
     public void testFinalObjectWithNonFinalFields() {
-        ValidationResult result = defaultImmutizer.verify(FinalParentWithNonFinalFieldsPojo.class);
+        ValidationResult result = defaultImmutizer.getValidationResult(FinalParentWithNonFinalFieldsPojo.class);
 
         // we should have gotten 5 errors
         assertEquals(false, result.isValid());
@@ -48,7 +48,7 @@ public class BaseTests {
 
     @Test
     public void testFinalMutableCollection() {
-        ValidationResult result = defaultImmutizer.verify(MutableCollectionPojo.class);
+        ValidationResult result = defaultImmutizer.getValidationResult(MutableCollectionPojo.class);
 
         assertEquals(false, result.isValid());
         assertEquals(1, result.getErrors().size());
@@ -58,11 +58,28 @@ public class BaseTests {
 
     @Test
     public void testFinalImmutableCollection() {
-        ValidationResult result = defaultImmutizer.verify(ImmutableCollectionPojo.class);
+        ValidationResult result = defaultImmutizer.getValidationResult(ImmutableCollectionPojo.class);
 
         // should be fine,  no errors
         assertEquals(true,result.isValid());
         assertEquals("OK",result.toString());
+    }
+
+    @Test(expected = NullPointerException.class)
+    public void testVerifyInstanceForNull() {
+        Integer val = null;
+        defaultImmutizer.verify(val);
+    }
+
+    @Test(expected = NullPointerException.class)
+    public void testVerifyClassForNull() {
+        Class val = null;
+        defaultImmutizer.verify(val);
+    }
+
+    @Test(expected = NullPointerException.class)
+    public void testGetValidationResultForNull() {
+        defaultImmutizer.getValidationResult(null);
     }
 
 }

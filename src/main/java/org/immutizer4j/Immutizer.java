@@ -31,7 +31,8 @@ public class Immutizer {
             .makeMap();
 
     public Immutizer() {
-        safeTypes = ImmutizerConstants.KNOWN_TYPES;
+        // assumes no custom types
+        this(new Class[]{});
     }
 
     /**
@@ -43,6 +44,36 @@ public class Immutizer {
                 .addAll(ImmutizerConstants.KNOWN_TYPES)
                 .addAll(Sets.newHashSet(safeTypes))
                 .build();
+
+        // eat your own dogfood or go home
+        verify(ValidationResult.class);
+    }
+
+    /**
+     * Validates instance of type and throws exception if violation found
+     * @throws ImmutabilityViolationException
+     */
+    public void verify(Object instance) {
+        if (instance != null) {
+            verify(instance.getClass());
+        } else {
+            throw new NullPointerException("instance was null");
+        }
+    }
+
+    /**
+     * Validates type and throws exception if violation found
+     * @throws ImmutabilityViolationException
+     */
+    public void verify(Class<?> clazz) {
+        if (clazz != null) {
+            ValidationResult result = getValidationResult(clazz);
+            if (!result.isValid()) {
+                throw new ImmutabilityViolationException(result);
+            }
+        } else {
+            throw new NullPointerException("clazz was null");
+        }
     }
 
     /**
@@ -52,28 +83,35 @@ public class Immutizer {
      * @param clazz Entity to check
      * @return Validation result
      */
-    public ValidationResult verify(Class<?> clazz) {
-        if (validationCache.containsKey(clazz)) {
-            // all good, we verified this type before
-            return validationCache.get(clazz);
+    public ValidationResult getValidationResult(Class<?> clazz) {
+        if (clazz != null) {
+
+            if (validationCache.containsKey(clazz)) {
+                // all good, we verified this type before
+                return validationCache.get(clazz);
+            } else {
+                ValidationResult result = performValidation(clazz, ThreadLocals.STRINGBUILDER.get()
+                        .append(clazz.getSimpleName()));
+                //remember that it was fine
+                validationCache.putIfAbsent(clazz, result);
+                return result;
+            }
+
         } else {
-            ValidationResult result = performValidation(clazz, ThreadLocals.STRINGBUILDER.get()
-                    .append(clazz.getSimpleName()));
-            //remember that it was fine
-            validationCache.putIfAbsent(clazz,result);
-            return result;
+            throw new NullPointerException("clazz was null");
         }
+
     }
 
     // performs actual walk down the graph hierarchy
     private ValidationResult performValidation(Class<?> entity, StringBuilder currentPath) {
         Class<?> current = entity;
-        ValidationResult result = new ValidationResult();
+        ValidationResult result = new ValidationResult(ImmutableSet.<ValidationError>of());
         while (current != null && !current.equals(Object.class)) {
 
             Field[] fields = current.getDeclaredFields();
             for(Field field : fields) {
-                validateField(field, result, Optional.<Field>empty());
+                result = validateField(field, result, Optional.<Field>empty());
             }
 
             // move up the class hierarchy level
@@ -84,18 +122,18 @@ public class Immutizer {
     }
 
     // performs all the validations for a single field
-    private void validateField(Field field, ValidationResult result, Optional<Field> parent) {
+    private ValidationResult validateField(Field field, ValidationResult result, Optional<Field> parent) {
 
         if (!Modifier.isStatic(field.getModifiers())) {
 
             // basic final check
             if (!Modifier.isFinal(field.getModifiers())){
-                addError(field, ViolationType.NON_FINAL_FIELD, result);
+                result = addError(field, ViolationType.NON_FINAL_FIELD, result);
             }
 
             // collections
             if (Collection.class.isAssignableFrom(field.getType()) && !isSafeType(field)) {
-                addError(field, ViolationType.MUTABLE_TYPE, result);
+                result = addError(field, ViolationType.MUTABLE_TYPE, result);
             }
 
             // for custom types, recursively check its own fields
@@ -103,11 +141,13 @@ public class Immutizer {
 
                 for(Field childField : field.getType().getDeclaredFields()) {
                     log.debug("Validating {}.{}", childField.getDeclaringClass().getSimpleName(), childField.getName());
-                    validateField(childField, result, Optional.of(field));
+                    result = validateField(childField, result, Optional.of(field));
                 }
             }
 
         }
+
+        return result;
 
     }
 
@@ -121,11 +161,11 @@ public class Immutizer {
         return false;
     }
 
-    // standard handler for reporting errors
-    private void addError(Field field, ViolationType violationType, ValidationResult result) {
+    // standard handler for reporting errors, returns a new immutable ValidationResult instance
+    private ValidationResult addError(Field field, ViolationType violationType, ValidationResult result) {
         ValidationError error = new ValidationError(field.getDeclaringClass(), field.getName(), violationType);
-        log.error("Immutability violation: {}",error);
-        result.getErrors().add(error);
+        log.error("Immutability violation: {}", error);
+        return result.addError(error);
     }
 
 }
