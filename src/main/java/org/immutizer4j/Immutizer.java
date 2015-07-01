@@ -8,6 +8,7 @@ import lombok.extern.slf4j.Slf4j;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
+import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.ConcurrentMap;
 
@@ -71,7 +72,7 @@ public class Immutizer {
 
             Field[] fields = current.getDeclaredFields();
             for(Field field : fields) {
-                validateField(field, result);
+                validateField(field, result, Optional.<Field>empty());
             }
 
             // move up the class hierarchy level
@@ -82,21 +83,25 @@ public class Immutizer {
     }
 
     // performs all the validations for a single field
-    private void validateField(Field field, ValidationResult result) {
+    private void validateField(Field field, ValidationResult result, Optional<Field> parent) {
 
-        // basic final check
-        if (!Modifier.isStatic(field.getModifiers()) && !Modifier.isFinal(field.getModifiers())){
-            log.error("Found mutable field {}.{}",field.getDeclaringClass().getSimpleName(),field.getName());
-            result.getErrors().add(new ValidationError(field.getDeclaringClass(), field.getName(), ViolationType.NON_FINAL_FIELD));
-        }
+        if (!Modifier.isStatic(field.getModifiers())) {
 
-        // check its own fields, if any
-        for(Field childField : field.getType().getDeclaredFields()) {
-            if (!Modifier.isStatic(childField.getModifiers())
-                    && !childField.getType().isPrimitive()
-                    && !ImmutizerConstants.KNOWN_TYPES.contains(childField.getType())) {
-                log.debug("Validating {}.{}", childField.getDeclaringClass().getSimpleName(), childField.getName());
-                validateField(childField, result);
+            // basic final check
+            if (!Modifier.isFinal(field.getModifiers())){
+                ValidationError error = new ValidationError(field.getDeclaringClass(), field.getName(), ViolationType.NON_FINAL_FIELD);
+                log.error("Immutability violation: {}",error);
+                result.getErrors().add(error);
+            }
+
+            // for custom types, recursively check its own fields
+            if (!ImmutizerConstants.KNOWN_TYPES.contains(field.getType())) {
+
+                for(Field childField : field.getType().getDeclaredFields()) {
+                    log.debug("Validating {}.{}", childField.getDeclaringClass().getSimpleName(), childField.getName());
+                    validateField(childField, result, Optional.of(field));
+                }
+
             }
         }
 

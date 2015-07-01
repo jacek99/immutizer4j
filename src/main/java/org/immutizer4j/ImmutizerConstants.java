@@ -2,7 +2,9 @@ package org.immutizer4j;
 
 import com.google.common.collect.ImmutableCollection;
 import com.google.common.collect.ImmutableSet;
+import lombok.SneakyThrows;
 
+import java.lang.reflect.Field;
 import java.util.Set;
 
 /**
@@ -15,7 +17,6 @@ class ImmutizerConstants {
     /**
      * For performance, automatically interns it in the JVM
      */
-    public static final String HIERARCHY_SEPARATOR = "/";
     public static final String FIELD_SEPARATOR = ".";
     public static final String MSG_SEPARATOR = " : ";
 
@@ -32,5 +33,4 @@ class ImmutizerConstants {
                     // Guava Immutable collections
                     .add(ImmutableCollection.class)
                     .build();
-
 }

@@ -7,7 +7,7 @@ import java.util.StringJoiner;
  *
  * @author Jacek Furmankiewicz
  */
-public class ThreadLocals {
+class ThreadLocals {
 
     /**
      * Thread-local StringBuilder, avoids the overhead of instantiating a new one every time

@@ -6,7 +6,6 @@ import org.immutizer4j.Immutizer;
 import org.immutizer4j.ValidationResult;
 import org.immutizer4j.test.sample.FinalParentWithNonFinalFields;
 import org.immutizer4j.test.sample.NonFinalFields;
-import org.junit.Assert;
 import org.junit.Test;
 
 /**
