@@ -3,11 +3,10 @@ package org.immutizer4j;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.MapMaker;
 import com.google.common.collect.Sets;
+import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 
-import java.lang.reflect.Constructor;
-import java.lang.reflect.Field;
-import java.lang.reflect.Modifier;
+import java.lang.reflect.*;
 import java.util.Collection;
 import java.util.Optional;
 import java.util.Set;
@@ -120,6 +119,7 @@ public class Immutizer {
         return result;
     }
 
+    @SneakyThrows // avoid checked exceptions thanks to Lombok
     // performs all the validations for a single field
     private ValidationResult validateField(Field field, ValidationResult result, Optional<Field> parent) {
 
@@ -131,8 +131,23 @@ public class Immutizer {
             }
 
             // collections
-            if (Collection.class.isAssignableFrom(field.getType()) && !isSafeType(field)) {
-                result = addError(field, ViolationType.MUTABLE_TYPE, result);
+            if (Collection.class.isAssignableFrom(field.getType())) {
+
+                // check if collection is immutable to begin with
+                if (!isSafeType(field)) {
+                    result = addError(field, ViolationType.MUTABLE_TYPE, result);
+                }
+
+                // check if the type stored in the collection is immutable (works around type erasure)
+                ParameterizedType parameterizedType = (ParameterizedType) field.getGenericType();
+                for(Type type : parameterizedType.getActualTypeArguments()) {
+                    Class<?> genericType = Class.forName(type.getTypeName());
+
+                    ValidationResult nestedResult = getValidationResult(genericType);
+                    if (!nestedResult.isValid()) {
+                        result = addError(field,ViolationType.MUTABLE_TYPE_STORED_IN_COLLECTION, result);
+                    }
+                }
             }
 
             // for custom types, recursively check its own fields

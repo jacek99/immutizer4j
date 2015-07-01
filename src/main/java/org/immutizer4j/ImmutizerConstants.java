@@ -27,8 +27,10 @@ class ImmutizerConstants {
      */
     static Set<Class<?>> KNOWN_TYPES =
             ImmutableSet.<Class<?>>builder()
+                    // JVM
+                    .add(Class.class)
                     // primitive types
-                    .add(byte.class,boolean.class,short.class,int.class,long.class,float.class,double.class,char.class)
+                    .add(byte.class, boolean.class, short.class, int.class, long.class, float.class, double.class, char.class)
                     // object types
                     .add(Byte.class, Boolean.class, Short.class, Integer.class, Long.class, Float.class, Double.class,
                             Character.class, String.class)

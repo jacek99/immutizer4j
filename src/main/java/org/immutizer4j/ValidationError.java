@@ -1,6 +1,5 @@
 package org.immutizer4j;
 
-import com.sun.org.apache.bcel.internal.generic.ICONST;
 import lombok.Value;
 
 import java.lang.reflect.Field;

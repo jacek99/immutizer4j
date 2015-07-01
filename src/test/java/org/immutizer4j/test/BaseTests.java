@@ -4,10 +4,7 @@ import static org.junit.Assert.*;
 
 import org.immutizer4j.Immutizer;
 import org.immutizer4j.ValidationResult;
-import org.immutizer4j.test.sample.FinalParentWithNonFinalFieldsPojo;
-import org.immutizer4j.test.sample.ImmutableCollectionPojo;
-import org.immutizer4j.test.sample.MutableCollectionPojo;
-import org.immutizer4j.test.sample.NonFinalFieldsPojo;
+import org.immutizer4j.test.sample.*;
 import org.junit.Test;
 
 /**
@@ -64,6 +61,15 @@ public class BaseTests {
         // should be fine,  no errors
         assertEquals(true,result.isValid());
         assertEquals("OK",result.toString());
+    }
+
+    @Test
+    public void testMutableElementWithinImmutableCollection() {
+        ValidationResult result = defaultImmutizer.getValidationResult(ImmutableCollectionWithMutableElementPojo.class);
+
+        //it should detect that though both collections are immutable, the type stored in one of them is not
+        assertEquals(false, result.isValid());
+        assertEquals("org.immutizer4j.test.sample.ImmutableCollectionWithMutableElementPojo.mutableElementList : MUTABLE_TYPE_STORED_IN_COLLECTION",result.toString());
     }
 
     @Test(expected = NullPointerException.class)
