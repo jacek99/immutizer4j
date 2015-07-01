@@ -46,7 +46,7 @@ public class ValidationResult {
         } else {
             return errors.stream()
                     .map(ValidationError::toString)
-                    .collect(Collectors.joining("\n"));
+                    .collect(Collectors.joining(ImmutizerConstants.NEWLINE));
         }
     }
 

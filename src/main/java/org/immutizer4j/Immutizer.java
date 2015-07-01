@@ -90,8 +90,7 @@ public class Immutizer {
                 // all good, we verified this type before
                 return validationCache.get(clazz);
             } else {
-                ValidationResult result = performValidation(clazz, ThreadLocals.STRINGBUILDER.get()
-                        .append(clazz.getSimpleName()));
+                ValidationResult result = performValidation(clazz);
                 //remember that it was fine
                 validationCache.putIfAbsent(clazz, result);
                 return result;
@@ -104,7 +103,7 @@ public class Immutizer {
     }
 
     // performs actual walk down the graph hierarchy
-    private ValidationResult performValidation(Class<?> entity, StringBuilder currentPath) {
+    private ValidationResult performValidation(Class<?> entity) {
         Class<?> current = entity;
         ValidationResult result = new ValidationResult(ImmutableSet.<ValidationError>of());
         while (current != null && !current.equals(Object.class)) {

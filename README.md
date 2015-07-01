@@ -8,6 +8,8 @@ To be immutable all fields must be final and the only collections allowed are Go
 It can be extended with custom types that you can flag as immutable (e.g. a different immutable collection
 library than Guava).
 
+**Requires Java 8.**
+
 # Use cases
 
 Use this whenever you do have shared state (e.g. in-memory caches in ConcurrentHashMap) and you want to avoid
@@ -33,7 +35,13 @@ immutizer.verify(MyPojo.class);
 ValidationResult result = immutizer.getValidationResult(MyPojo.class);
 ```
 
-That's it.    
+That's it. 
+
+A good place to put this is in the constructor of every in-memory cache you have to ensure only immutable objects
+can get stored in it. As soon as a developer modifies the object graph to violate immutability it should throw an
+exception on startup.
+
+Or add it within your JUnit tests for every single object type that is cached in memory, passed as a message, etc.
 
 # Adding custom immutable types
 
