@@ -8,6 +8,7 @@ import lombok.extern.slf4j.Slf4j;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
+import java.util.Collection;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.ConcurrentMap;
@@ -94,40 +95,30 @@ public class Immutizer {
                 result.getErrors().add(error);
             }
 
+            // collections
+            if (Collection.class.isAssignableFrom(field.getType()) && !isSafeType(field)) {
+                ValidationError error = new ValidationError(field.getDeclaringClass(), field.getName(), ViolationType.MUTABLE_TYPE);
+                log.error("Immutability violation: {}",error);
+                result.getErrors().add(error);
+            }
+
             // for custom types, recursively check its own fields
-            if (!ImmutizerConstants.KNOWN_TYPES.contains(field.getType())) {
+            if (!isSafeType(field)) {
 
                 for(Field childField : field.getType().getDeclaredFields()) {
                     log.debug("Validating {}.{}", childField.getDeclaringClass().getSimpleName(), childField.getName());
                     validateField(childField, result, Optional.of(field));
                 }
-
             }
+
         }
 
-//        // check for mutable types
-//        if (!safeTypes.contains(field.getType())) {
-//
-//            // it's not in the list of concrete types, but maybe assignable to it
-//            if (!isSafeType(field)) {
-//
-//                // type is not in the list of known immutable types
-//                // however it can be automatically recognized as immutable if it is final (which it is by this point)
-//                // and all of its fields are immutable
-//
-//                performValidation(field.getType());
-//            } else {
-//
-//            }
-//        }
-//
-//        return Optional.empty();
     }
 
     // validates if the field type can be safely assigned to any of the
     private boolean isSafeType(Field field) {
         for(Class<?> clazz : safeTypes) {
-            if (field.getType().isAssignableFrom(clazz)) {
+            if (clazz.isAssignableFrom(field.getType())) {
                 return true;
             }
         }
