@@ -33,6 +33,9 @@ immutizer.verify(MyPojo.class);
 
 // get the validation result without throwing an exception
 ValidationResult result = immutizer.getValidationResult(MyPojo.class);
+if (!result.isValid()) {
+    // do something custom
+}
 ```
 
 That's it. 
