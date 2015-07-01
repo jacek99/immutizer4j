@@ -57,7 +57,6 @@ private final static Immutizer immutizer = new Immutizer(MyCustomImmutableCollec
 But honestly, you should probably just look at Guava immutable collections, they should cover all reasonable
 use cases: <https://github.com/google/guava/wiki/ImmutableCollectionsExplained>.
 
-
 # Performance
 
 Any type is validated only once. Each subsequent request returns a cached *immutable* (of course) validation result.
@@ -73,11 +72,16 @@ It is used throughout this project for any immutable POJOs.
 
 # Dependencies
 
-* SLF4J API: MIT License <http://slf4j.org/license.html>
-* Google Guava: Apache license <https://github.com/google/guava/blob/master/CONTRIBUTING.md>
+* SLF4J API (MIT License <http://slf4j.org/license.html>)
+* Google Guava (Apache license <https://github.com/google/guava/blob/master/CONTRIBUTING.md>)
 
 # License
 
 This software is licensed under the BSD license.
+
+# TODO Items
+
+* handle checking of types within a collection (to deal with type erasure in Java generics)
+* treat arrays as warnings (or optionally be strict and disallow them altogether)
 
 

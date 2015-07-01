@@ -11,6 +11,7 @@ import org.immutizer4j.test.sample.NonFinalFieldsPojo;
 import org.junit.Test;
 
 /**
+ * Tests for all base functionality
  * @author Jacek Furmankiewicz
  */
 public class BaseTests {

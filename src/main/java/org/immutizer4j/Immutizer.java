@@ -24,7 +24,7 @@ public class Immutizer {
     // additional types that we were told are immutable
     private final Set<Class<?>> safeTypes;
 
-    private static final ConcurrentMap<Class<?>,ValidationResult> validationCache =
+    private final ConcurrentMap<Class<?>,ValidationResult> validationCache =
             new MapMaker()
             .concurrencyLevel(Runtime.getRuntime().availableProcessors())
             .initialCapacity(100)
@@ -153,7 +153,7 @@ public class Immutizer {
     // validates if the field type can be safely assigned to any of the
     private boolean isSafeType(Field field) {
         for(Class<?> clazz : safeTypes) {
-            if (clazz.isAssignableFrom(field.getType())) {
+            if (clazz.equals(field.getType()) || clazz.isAssignableFrom(field.getType())) {
                 return true;
             }
         }
