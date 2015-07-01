@@ -69,7 +69,7 @@ We recommend using **Lombok** to easily create immutable objects in Java using *
 
 <http://projectlombok.org/features/Value.html>
 
-That is what is used throughout this project for any immutable POJOs. 
+It is used throughout this project for any immutable POJOs. 
 
 # License
 
