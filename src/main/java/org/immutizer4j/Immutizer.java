@@ -20,6 +20,9 @@ import java.util.concurrent.ConcurrentMap;
 @Slf4j
 public class Immutizer {
 
+    // may allow arrays to pass or not (no by default)
+    private boolean strict = true;
+
     // additional types that we were told are immutable
     private final Set<Class<?>> safeTypes;
 
@@ -29,9 +32,21 @@ public class Immutizer {
             .initialCapacity(100)
             .makeMap();
 
+    /**
+     * Constructor. Assumes strict mode
+     */
     public Immutizer() {
         // assumes no custom types
-        this(new Class[]{});
+        this(true, new Class[]{});
+    }
+
+    /**
+     * Constructor
+     * @param strict Controls if we run in strict mode or not (which allows arrays of immutable types to be allowed)
+     */
+    public Immutizer(boolean strict) {
+        // assumes no custom types
+        this(strict,new Class[]{});
     }
 
     /**
@@ -39,6 +54,16 @@ public class Immutizer {
      * @param safeTypes Additional safe types (e.g. Joda DateTime objects, etc) for us to recognize
      */
     public Immutizer(Class<?> ...safeTypes) {
+        this(true, safeTypes);
+    }
+
+    /**
+     * Constructor
+     * @param strict Controls if we run in strict mode or not (which allows arrays of immutable types to be allowed)
+     * @param safeTypes Additional safe types (e.g. Joda DateTime objects, etc) for us to recognize
+     */
+    public Immutizer(boolean strict, Class<?> ...safeTypes) {
+        this.strict = strict;
         this.safeTypes = ImmutableSet.<Class<?>>builder()
                 .addAll(ImmutizerConstants.KNOWN_TYPES)
                 .addAll(Sets.newHashSet(safeTypes))
@@ -148,6 +173,12 @@ public class Immutizer {
                         result = addError(field,ViolationType.MUTABLE_TYPE_STORED_IN_COLLECTION, result);
                     }
                 }
+            }
+
+            // arrays (can be allowed if we are not running in strict mode)
+            if (field.getType().isArray() && strict) {
+                
+                result = addError(field,ViolationType.MUTABLE_ARRAY,result);
             }
 
             // for custom types, recursively check its own fields

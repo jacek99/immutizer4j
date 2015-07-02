@@ -19,5 +19,11 @@ public enum ViolationType {
      * Used if the type stored within an immutable collection is mutable itself,
      * e.g. ImmutableSet<MyPojo>. It is still not 100% immutable in this case.
      */
-    MUTABLE_TYPE_STORED_IN_COLLECTION
+    MUTABLE_TYPE_STORED_IN_COLLECTION,
+    /**
+     * Arrays are by default mutable, no way around it in Java (see our ImmutableArray though)
+     * However, under certain conditions due to performance or memory requirements we may allow them
+     * if you set strict=false in the Immutizer
+     */
+    MUTABLE_ARRAY
 }
