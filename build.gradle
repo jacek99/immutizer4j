@@ -74,17 +74,20 @@ bintray {
     user = "$System.env.BINTRAY_USER"
     key = "$System.env.BINTRAY_API_KEY"
 
+    print user
+    print key
+
     configurations = ['published', 'archives']
     dryRun = false //Whether to run this as dry-run, without deploying
     publish = true //If version should be auto published after an upload
     pkg {
-        repo = 'javabuilders'
+        repo = 'immutizer4j'
         name = project.name
-        desc = 'Maximum productivity with minimum code via declarative UIs for Java.'
-        websiteUrl = 'https://github.com/jacek99/javabuilders'
-        issueTrackerUrl = 'https://github.com/jacek99/javabuilders/issues'
-        vcsUrl = 'https://github.com/jacek99/javabuilders'
-        licenses = ['Apache-2.0']
+        desc = 'Library for checking immutability of Java object graphs'
+        websiteUrl = 'https://github.com/jacek99/immutizer4j'
+        issueTrackerUrl = 'https://github.com/jacek99/immutizer4j/issues'
+        vcsUrl = 'https://github.com/jacek99/immutizer4j'
+        licenses = ['BSD']
         publicDownloadNumbers = true
     }
 }
