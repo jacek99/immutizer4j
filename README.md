@@ -99,6 +99,36 @@ It is used throughout this project for any immutable POJOs.
 * SLF4J API (MIT License <http://slf4j.org/license.html>)
 * Google Guava (Apache license <https://github.com/google/guava/blob/master/CONTRIBUTING.md>)
 
+# Adding to your project
+
+The artifacts for this library are published to the popular Bintray JCenter Maven repository.
+
+## Gradle
+
+    repositories {
+        jcenter()
+    }
+
+    compile "org,immutizer4j:immutizer4j:0.1.0"
+
+
+## Maven
+
+    <repositories>
+            <repository>
+                    <id>jcenter</id>
+                    <url>http://jcenter.bintray.com</url>
+            </repository>
+    </repositories>
+
+    <dependencies>
+            <dependency>
+                    <groupId>org.immutizer4j</groupId>
+                    <artifactId>immutizer4j</artifactId>
+                    <version>0.1.0</version>
+            </dependency>
+    </dependencies>
+
 # License
 
 This software is licensed under the BSD license.
