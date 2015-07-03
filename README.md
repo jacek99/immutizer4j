@@ -64,6 +64,23 @@ private final static Immutizer immutizer = new Immutizer(MyCustomImmutableCollec
 But honestly, you should probably just look at Guava immutable collections, they should cover all reasonable
 use cases: <https://github.com/google/guava/wiki/ImmutableCollectionsExplained>.
 
+## Special handling of array
+
+Java arrays by definition are mutable and there is no way around it. However, in some circumstances (e.g. when
+dealing with large in-memory caches where we want to avoid the memory overhead of collections on every cached object),
+they are a necessary compromise.
+
+It is possible to create an Immutizer instance that runs in *non-strict* mode (by passing **string=false** in the
+constructor). This will allow arrays, as long as the type they contain is immutable itself.
+
+```java
+// set strict flag to false
+private final static Immutizer immutizer = new Immutizer(false);
+
+// verify the type of an object
+immutizer.verify(MyPojoWithArrays.class);
+```
+
 # Performance
 
 Any type is validated only once. Each subsequent request returns a cached *immutable* (of course) validation result.
@@ -86,8 +103,5 @@ It is used throughout this project for any immutable POJOs.
 
 This software is licensed under the BSD license.
 
-# TODO Items
-
-* treat arrays as warnings (or optionally be strict and disallow them altogether)
 
 
