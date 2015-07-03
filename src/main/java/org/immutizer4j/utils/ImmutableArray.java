@@ -1,4 +1,4 @@
-package org.immutizer4j;
+package org.immutizer4j.utils;
 
 import lombok.Value;
 

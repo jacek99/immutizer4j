@@ -17,7 +17,7 @@ public enum ViolationType {
     MUTABLE_TYPE,
     /**
      * Used if the type stored within an immutable collection is mutable itself,
-     * e.g. ImmutableSet<MyPojo>. It is still not 100% immutable in this case.
+     * e.g. ImmutableSet&lt;MyPojo&gt;. It is still not 100% immutable in this case.
      */
     MUTABLE_TYPE_STORED_IN_COLLECTION,
     /**

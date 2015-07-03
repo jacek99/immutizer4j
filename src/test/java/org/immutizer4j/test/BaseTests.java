@@ -40,9 +40,9 @@ public class BaseTests {
         assertEquals(5, result.getErrors().size());
         assertTrue(result.toString(),result.toString().contains("org.immutizer4j.test.sample.NonFinalFieldsPojo.testInt : NON_FINAL_FIELD"));
         assertTrue(result.toString(),result.toString().contains("org.immutizer4j.test.sample.NonFinalFieldsPojo.testInteger : NON_FINAL_FIELD"));
-        assertTrue(result.toString(),result.toString().contains("org.immutizer4j.test.sample.NonFinalFieldsPojo.testString : NON_FINAL_FIELD"));
-        assertTrue(result.toString(),result.toString().contains("org.immutizer4j.test.sample.NonFinalFieldsPojo.testDouble : NON_FINAL_FIELD"));
-        assertTrue(result.toString(),result.toString().contains("org.immutizer4j.test.sample.NonFinalFieldsPojo.testDbl : NON_FINAL_FIELD"));
+        assertTrue(result.toString(), result.toString().contains("org.immutizer4j.test.sample.NonFinalFieldsPojo.testString : NON_FINAL_FIELD"));
+        assertTrue(result.toString(), result.toString().contains("org.immutizer4j.test.sample.NonFinalFieldsPojo.testDouble : NON_FINAL_FIELD"));
+        assertTrue(result.toString(), result.toString().contains("org.immutizer4j.test.sample.NonFinalFieldsPojo.testDbl : NON_FINAL_FIELD"));
    }
 
     @Test
@@ -105,4 +105,9 @@ public class BaseTests {
         defaultImmutizer.getValidationResult(null);
     }
 
+    @Test
+    public void testImmutablePojo() {
+        ValidationResult result = defaultImmutizer.getValidationResult(ImmutablePojo.class);
+        assertEquals(true,result.isValid());
+    }
 }

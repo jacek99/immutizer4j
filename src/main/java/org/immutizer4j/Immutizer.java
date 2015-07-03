@@ -68,9 +68,6 @@ public class Immutizer {
                 .addAll(ImmutizerConstants.KNOWN_TYPES)
                 .addAll(Sets.newHashSet(safeTypes))
                 .build();
-
-        // eat your own dogfood or go home
-        verify(ValidationResult.class);
     }
 
     /**
@@ -154,40 +151,16 @@ public class Immutizer {
                 result = addError(field, ViolationType.NON_FINAL_FIELD, result);
             }
 
-            // collections
-            if (Collection.class.isAssignableFrom(field.getType())) {
-
-                // check if collection is immutable to begin with
-                if (!isSafeType(field)) {
-                    result = addError(field, ViolationType.MUTABLE_TYPE, result);
-                }
-
-                // check if the type stored in the collection is immutable (works around type erasure)
-                ParameterizedType parameterizedType = (ParameterizedType) field.getGenericType();
-                for(Type type : parameterizedType.getActualTypeArguments()) {
-                    try {
-                        Class<?> genericType = Class.forName(type.getTypeName());
-
-                        ValidationResult nestedResult = getValidationResult(genericType);
-                        if (!nestedResult.isValid()) {
-                            result = addError(field, ViolationType.MUTABLE_TYPE_STORED_IN_COLLECTION, result);
-                        }
-                    } catch (ClassNotFoundException e) {
-                        result = addError(field, ViolationType.GENERIC_TYPE_WITH_WILDCARD, result);
-                    }
-                }
-            }
-
-            // arrays (can be allowed if we are not running in strict mode)
-            if (field.getType().isArray() && strict) {
-                
-                result = addError(field,ViolationType.MUTABLE_ARRAY,result);
-            }
+            result = handleCollections(field, result);
+            result = handleArrays(field, result);
 
             // for custom types, recursively check its own fields
-            if (!isSafeType(field)) {
+            // some reflection magic for dealing with arrays vs regular types
+            Class<?> actualType = (field.getType().isArray()) ? field.getType().getComponentType() : field.getType();
 
-                for(Field childField : field.getType().getDeclaredFields()) {
+            if (!isSafeType(actualType)) {
+
+                for(Field childField : actualType.getDeclaredFields()) {
                     log.debug("Validating {}.{}", childField.getDeclaringClass().getSimpleName(), childField.getName());
                     result = validateField(childField, result, Optional.of(field));
                 }
@@ -199,10 +172,49 @@ public class Immutizer {
 
     }
 
+    // common logic for handling collection tyoes
+    private ValidationResult handleCollections(Field field, ValidationResult result) {
+        if (Collection.class.isAssignableFrom(field.getType())) {
+
+            // check if collection is immutable to begin with
+            if (!isSafeType(field.getType())) {
+                result = addError(field, ViolationType.MUTABLE_TYPE, result);
+            }
+
+            // check if the type stored in the collection is immutable (works around type erasure)
+            ParameterizedType parameterizedType = (ParameterizedType) field.getGenericType();
+            for(Type type : parameterizedType.getActualTypeArguments()) {
+                try {
+                    Class<?> genericType = Class.forName(type.getTypeName());
+
+                    ValidationResult nestedResult = getValidationResult(genericType);
+                    if (!nestedResult.isValid()) {
+                        result = addError(field, ViolationType.MUTABLE_TYPE_STORED_IN_COLLECTION, result);
+                    }
+                } catch (ClassNotFoundException e) {
+                    result = addError(field, ViolationType.GENERIC_TYPE_WITH_WILDCARD, result);
+                }
+            }
+        }
+
+        return result;
+    }
+
+    // arrays (can be allowed if we are not running in strict mode)
+    private ValidationResult handleArrays(Field field, ValidationResult result) {
+        if (field.getType().isArray() && strict) {
+
+            if (strict) {
+                result = addError(field,ViolationType.MUTABLE_ARRAY,result);
+            }
+        }
+        return result;
+    }
+
     // validates if the field type can be safely assigned to any of the
-    private boolean isSafeType(Field field) {
+    private boolean isSafeType(Class<?> type) {
         for(Class<?> clazz : safeTypes) {
-            if (clazz.equals(field.getType()) || clazz.isAssignableFrom(field.getType())) {
+            if (clazz.equals(type) || clazz.isAssignableFrom(type)) {
                 return true;
             }
         }
