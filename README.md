@@ -109,7 +109,7 @@ The artifacts for this library are published to the popular Bintray JCenter Mave
         jcenter()
     }
 
-    compile "org,immutizer4j:immutizer4j:0.1.0"
+    compile "org.immutizer4j:immutizer4j:0.1.0"
 
 
 ## Maven
