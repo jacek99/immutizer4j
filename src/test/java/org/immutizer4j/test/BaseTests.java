@@ -108,6 +108,41 @@ public class BaseTests {
     @Test
     public void testImmutablePojo() {
         ValidationResult result = defaultImmutizer.getValidationResult(ImmutablePojo.class);
-        assertEquals(true,result.isValid());
+        assertEquals(true, result.isValid());
+    }
+
+    /**
+     * We should not just test a particular object's field, but all of its ancestors as well
+     */
+    @Test
+    public void testAllFieldsInAnObjectHierarchy() {
+        ValidationResult result = defaultImmutizer.getValidationResult(ChildPojo.class);
+
+        assertEquals(false,result.isValid());
+        // we should get 1 error from the ParentPojo, one from the ChildPojo
+        assertEquals(2, result.getErrors().size());
+
+        assertTrue(result.toString(),
+                result.toString().contains("org.immutizer4j.test.sample.ChildPojo.childMutableInt : NON_FINAL_FIELD"));
+        assertTrue(result.toString(),
+                result.toString().contains("org.immutizer4j.test.sample.ParentPojo.paretMutableInt : NON_FINAL_FIELD"));
+    }
+
+
+    /**
+     * When validating fields we should not just walk up the inheritance hierarchy for the root type, but for all
+     * the referenced types as well
+     */
+    @Test
+    public void testReferencesToAllFieldsInAnObjectHierarchy() {
+        ValidationResult result = defaultImmutizer.getValidationResult(ChildPojoReferencePojo.class);
+
+        assertEquals(false,result.isValid());
+        // we should get 1 error from the ParentPojo, one from the ChildPojo
+        assertEquals(2, result.getErrors().size());
+        assertTrue(result.toString(),
+                result.toString().contains("org.immutizer4j.test.sample.ChildPojo.childMutableInt : NON_FINAL_FIELD"));
+        assertTrue(result.toString(),
+                result.toString().contains("org.immutizer4j.test.sample.ParentPojo.paretMutableInt : NON_FINAL_FIELD"));
     }
 }

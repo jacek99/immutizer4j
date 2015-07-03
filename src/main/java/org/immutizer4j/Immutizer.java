@@ -8,7 +8,7 @@ import lombok.extern.slf4j.Slf4j;
 
 import java.lang.reflect.*;
 import java.util.Collection;
-import java.util.Optional;
+import java.util.Set;
 import java.util.concurrent.ConcurrentMap;
 
 /**
@@ -111,7 +111,7 @@ public class Immutizer {
                 // all good, we verified this type before
                 return validationCache.get(clazz);
             } else {
-                ValidationResult result = performValidation(clazz);
+                ValidationResult result = validateType(clazz);
                 //remember that it was fine
                 validationCache.putIfAbsent(clazz, result);
                 return result;
@@ -123,15 +123,19 @@ public class Immutizer {
 
     }
 
-    // performs actual walk down the graph hierarchy
-    private ValidationResult performValidation(Class<?> entity) {
+    // performs actual walk down the graph hierarchy starting from the root object
+    private ValidationResult validateType(Class<?> entity) {
+        return validateType(entity, new ValidationResult(ImmutableSet.<ValidationError>of()));
+    }
+
+    // performs actual walk down the graph hierarchy within an existing validation process
+    private ValidationResult validateType(Class<?> entity, ValidationResult result) {
         Class<?> current = entity;
-        ValidationResult result = new ValidationResult(ImmutableSet.<ValidationError>of());
         while (current != null && !current.equals(Object.class)) {
 
             Field[] fields = current.getDeclaredFields();
             for(Field field : fields) {
-                result = validateField(field, result, Optional.<Field>empty());
+                result = validateField(field, result);
             }
 
             // move up the class hierarchy level
@@ -142,7 +146,7 @@ public class Immutizer {
     }
 
     // performs all the validations for a single field
-    private ValidationResult validateField(Field field, ValidationResult result, Optional<Field> parent) {
+    private ValidationResult validateField(Field field, ValidationResult result) {
 
         if (!Modifier.isStatic(field.getModifiers())) {
 
@@ -159,13 +163,8 @@ public class Immutizer {
             Class<?> actualType = (field.getType().isArray()) ? field.getType().getComponentType() : field.getType();
 
             if (!isSafeType(actualType)) {
-
-                for(Field childField : actualType.getDeclaredFields()) {
-                    log.debug("Validating {}.{}", childField.getDeclaringClass().getSimpleName(), childField.getName());
-                    result = validateField(childField, result, Optional.of(field));
-                }
+                result = validateType(actualType, result);
             }
-
         }
 
         return result;
