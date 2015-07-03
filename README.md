@@ -64,7 +64,7 @@ private final static Immutizer immutizer = new Immutizer(MyCustomImmutableCollec
 But honestly, you should probably just look at Guava immutable collections, they should cover all reasonable
 use cases: <https://github.com/google/guava/wiki/ImmutableCollectionsExplained>.
 
-## Special handling of array
+## Special handling of arrays
 
 Java arrays by definition are mutable and there is no way around it. However, in some circumstances (e.g. when
 dealing with large in-memory caches where we want to avoid the memory overhead of collections on every cached object),
@@ -75,10 +75,10 @@ constructor). This will allow arrays, as long as the type they contain is immuta
 
 ```java
 // set strict flag to false
-private final static Immutizer immutizer = new Immutizer(false);
+private final static Immutizer nonStrictImmutizer = new Immutizer(false);
 
 // verify the type of an object
-immutizer.verify(MyPojoWithArrays.class);
+nonStrictImmutizer.verify(MyPojoWithArrays.class);
 ```
 
 # Performance
