@@ -25,5 +25,10 @@ public enum ViolationType {
      * However, under certain conditions due to performance or memory requirements we may allow them
      * if you set strict=false in the Immutizer
      */
-    MUTABLE_ARRAY
+    MUTABLE_ARRAY,
+    /**
+     * Used if we tried to find the generic type, but it may use a wildcard like ?
+     * in which case we cannot instantiate it
+     */
+    GENERIC_TYPE_WITH_WILDCARD
 }

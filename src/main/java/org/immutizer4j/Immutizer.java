@@ -3,13 +3,12 @@ package org.immutizer4j;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.MapMaker;
 import com.google.common.collect.Sets;
-import lombok.SneakyThrows;
+import lombok.Value;
 import lombok.extern.slf4j.Slf4j;
 
 import java.lang.reflect.*;
 import java.util.Collection;
 import java.util.Optional;
-import java.util.Set;
 import java.util.concurrent.ConcurrentMap;
 
 /**
@@ -18,15 +17,16 @@ import java.util.concurrent.ConcurrentMap;
  * @author Jacek Furmankiewicz
  */
 @Slf4j
+@Value
 public class Immutizer {
 
     // may allow arrays to pass or not (no by default)
-    private boolean strict = true;
+    private boolean strict;
 
     // additional types that we were told are immutable
-    private final Set<Class<?>> safeTypes;
+    private ImmutableSet<Class<?>> safeTypes;
 
-    private final ConcurrentMap<Class<?>,ValidationResult> validationCache =
+    private ConcurrentMap<Class<?>,ValidationResult> validationCache =
             new MapMaker()
             .concurrencyLevel(Runtime.getRuntime().availableProcessors())
             .initialCapacity(100)
@@ -144,7 +144,6 @@ public class Immutizer {
         return result;
     }
 
-    @SneakyThrows // avoid checked exceptions thanks to Lombok
     // performs all the validations for a single field
     private ValidationResult validateField(Field field, ValidationResult result, Optional<Field> parent) {
 
@@ -166,11 +165,15 @@ public class Immutizer {
                 // check if the type stored in the collection is immutable (works around type erasure)
                 ParameterizedType parameterizedType = (ParameterizedType) field.getGenericType();
                 for(Type type : parameterizedType.getActualTypeArguments()) {
-                    Class<?> genericType = Class.forName(type.getTypeName());
+                    try {
+                        Class<?> genericType = Class.forName(type.getTypeName());
 
-                    ValidationResult nestedResult = getValidationResult(genericType);
-                    if (!nestedResult.isValid()) {
-                        result = addError(field,ViolationType.MUTABLE_TYPE_STORED_IN_COLLECTION, result);
+                        ValidationResult nestedResult = getValidationResult(genericType);
+                        if (!nestedResult.isValid()) {
+                            result = addError(field, ViolationType.MUTABLE_TYPE_STORED_IN_COLLECTION, result);
+                        }
+                    } catch (ClassNotFoundException e) {
+                        result = addError(field, ViolationType.GENERIC_TYPE_WITH_WILDCARD, result);
                     }
                 }
             }

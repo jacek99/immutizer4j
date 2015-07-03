@@ -15,6 +15,22 @@ public class BaseTests {
 
     private Immutizer defaultImmutizer = new Immutizer();
 
+    /**
+     * If we can't be immutable, no one can
+     */
+    @Test
+    public void eatYourOwnDogfood() {
+        ValidationResult result = defaultImmutizer.getValidationResult(ValidationResult.class);
+        assertEquals(true, result.isValid());
+
+        // Immutizer itself is NOT immutable, since it uses generics with wildcards on internal fields
+        // but this is a good test to ensure we handle this scenario
+        result = defaultImmutizer.getValidationResult(Immutizer.class);
+        assertEquals(false,result.isValid());
+        assertEquals(1, result.getErrors().size());
+        assertEquals("org.immutizer4j.Immutizer.safeTypes : GENERIC_TYPE_WITH_WILDCARD",result.toString());
+    }
+
     @Test
     public void testNonFinalFields() {
         ValidationResult result = defaultImmutizer.getValidationResult(NonFinalFieldsPojo.class);
