@@ -70,7 +70,7 @@ Java arrays by definition are mutable and there is no way around it. However, in
 dealing with large in-memory caches where we want to avoid the memory overhead of collections on every cached object),
 they are a necessary compromise.
 
-It is possible to create an Immutizer instance that runs in *non-strict* mode (by passing **string=false** in the
+It is possible to create an Immutizer instance that runs in *non-strict* mode (by passing **strict=false** in the
 constructor). This will allow arrays, as long as the type they contain is immutable itself.
 
 ```java
