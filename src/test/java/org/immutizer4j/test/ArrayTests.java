@@ -62,8 +62,11 @@ public class ArrayTests {
         ValidationResult result = defaultImmutizer.getValidationResult(ImmutableArrayPojo.class);
 
         assertEquals(false,result.isValid());
-        assertEquals(1, result.getErrors().size());
-        assertEquals("org.immutizer4j.ImmutableArray.array : MUTABLE_ARRAY",result.toString());
+        assertEquals(2, result.getErrors().size());
+
+        assertTrue(result.toString(), result.toString().contains("org.immutizer4j.test.sample.generics.ImmutableArray.array : MUTABLE_ARRAY"));
+        assertTrue(result.toString(), result.toString().contains("org.immutizer4j.test.sample.generics.ImmutableArray.array : UNABLE_TO_DETERMINE_TYPE_DUE_TO_GENERICS_TYPE_ERASURE"));
+
     }
 
 }

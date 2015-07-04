@@ -1,7 +1,7 @@
 package org.immutizer4j.test.sample;
 
 import lombok.Value;
-import org.immutizer4j.ImmutableArray;
+import org.immutizer4j.test.sample.generics.ImmutableArray;
 
 /**
  * A POJO that uses ImmutableArray to wrap both mutable and immutable object types

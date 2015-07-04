@@ -1,7 +1,6 @@
-package org.immutizer4j;
+package org.immutizer4j.test.sample.generics;
 
 import lombok.Value;
-import org.immutizer4j.ImmutizerIgnore;
 
 import java.util.Arrays;
 

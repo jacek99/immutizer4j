@@ -226,15 +226,9 @@ public class Immutizer {
     // standard handler for reporting errors, returns a new immutable ValidationResult instance
     private ValidationResult addError(Field field, ViolationType violationType, ValidationResult result) {
         // log it as long as it is not marked as @ImmutizerIgnore
-        if (field.getAnnotation(ImmutizerIgnore.class) == null) {
-            ValidationError error = new ValidationError(field.getDeclaringClass(), field.getName(), violationType);
-            log.error("Immutability violation: {}", error);
-            return result.addError(error);
-        } else {
-            log.debug("Skipping immutability violation for field {}.{} due to being marked as @ImmutizerIgnore",
-                    field.getDeclaringClass().getSimpleName(),field.getName());
-            return result;
-        }
+        ValidationError error = new ValidationError(field.getDeclaringClass(), field.getName(), violationType);
+        log.error("Immutability violation: {}", error);
+        return result.addError(error);
     }
 
     /**
@@ -261,7 +255,8 @@ public class Immutizer {
 
             // try to extract actual class name via
             String sig = (String) signatureField.get(field);
-            if (sig.startsWith("T") && sig.endsWith(";")) {
+            // T = var, [T = array of vars
+            if ((sig.startsWith("T") || sig.startsWith("[T")) && sig.endsWith(";")) {
                 // OK, reference to a generic type
                 // unfortunately there is no information on the package of the type so we cannot get to it
                 // need to flag this is a violation
@@ -271,18 +266,5 @@ public class Immutizer {
 
         return result;
     }
-
-//    // figures out the standard JavaBean getter method name for a field
-//    private String getGetterName(Field field) {
-//        StringBuilder sb = ThreadLocals.STRINGBUILDER.get().append(ImmutizerConstants.GETTER_PREFIX);
-//
-//        if (field.getName().length() == 1) {
-//            sb.append(field.getName().toUpperCase());
-//        } else {
-//            sb.append(field.getName().substring(0,1).toUpperCase())
-//                    .append(field.getName().substring(1));
-//        }
-//        return sb.toString();
-//    }
 
 }
