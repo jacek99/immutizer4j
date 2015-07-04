@@ -93,7 +93,7 @@ As such, it is impossible to figure out the type, e.g.
 
 ```java
 @Value
-public class MyPojo<Type1,Type2> implements ISomeInterfaceWithGeneris<Type1,Type2> {
+public class MyPojo<Type1,Type2> implements ISomeInterfaceWithGenerics<Type1,Type2> {
     private Type1 variableA;
     private Type2 variableB;
 }
