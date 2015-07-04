@@ -53,4 +53,17 @@ public class ArrayTests {
         assertEquals(true, result.isValid());
     }
 
+    /**
+     * Tests for our own ImmutableArray utility class that allows to stay strict while avoiding most of the memory
+     * overhead of collections
+     */
+    @Test
+    public void testImmutableArrayUtilityClass() {
+        ValidationResult result = defaultImmutizer.getValidationResult(ImmutableArrayPojo.class);
+
+        assertEquals(false,result.isValid());
+        assertEquals(1, result.getErrors().size());
+        assertEquals("org.immutizer4j.ImmutableArray.array : MUTABLE_ARRAY",result.toString());
+    }
+
 }

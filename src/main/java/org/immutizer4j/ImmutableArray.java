@@ -1,6 +1,7 @@
-package org.immutizer4j.utils;
+package org.immutizer4j;
 
 import lombok.Value;
+import org.immutizer4j.ImmutizerIgnore;
 
 import java.util.Arrays;
 
@@ -8,10 +9,12 @@ import java.util.Arrays;
  * A workaround for the fact that immutable arrays are not possible in Java
  * Wraps a copy of the source array to ensure it cannot get modified
  *
- * Idea borrowed from Stack Overflow post:http://stackoverflow.com/questions/3700971/immutable-array-in-java
+ * Idea borrowed from Stack Overflow post:
+ * http://stackoverflow.com/questions/3700971/immutable-array-in-java
  */
 @Value
 public class ImmutableArray<T> {
+
     private T[] array;
 
     /**

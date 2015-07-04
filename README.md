@@ -81,6 +81,30 @@ private final static Immutizer nonStrictImmutizer = new Immutizer(false);
 nonStrictImmutizer.verify(MyPojoWithArrays.class);
 ```
 
+## Generics type erasure
+
+With the exception of collections (where it is still possible to figure the type stored in it), using generics
+in any form (e.g. implementing an interface with generics) totally erases all type information. 
+
+Some traces of the actual type are left in the internal private **Field.signature** field, but it contains just
+the class name, without the actual package. 
+
+As such, it is impossible to figure out the type, e.g.
+
+```java
+@Value
+public class MyPojo<Type1,Type2> implements ISomeInterfaceWithGeneris<Type1,Type2> {
+    private Type1 variableA;
+    private Type2 variableB;
+}
+```
+
+Even though the referenced types *Type1* and *Type2* in the example above may be immutable, it is impossible
+to actually obtain their types in any way via reflection.
+
+Due to this, Immutizer will **reject all references to generic types** (with the exception of collections). 
+Better to be strict than wrong. Use concrete types whenever possible.
+
 # Performance
 
 Any type is validated only once. Each subsequent request returns a cached *immutable* (of course) validation result.
@@ -109,7 +133,7 @@ The artifacts for this library are published to the popular Bintray JCenter Mave
         jcenter()
     }
 
-    compile "org.immutizer4j:immutizer4j:0.2.0"
+    compile "org.immutizer4j:immutizer4j:0.3.0"
 
 
 ## Maven
@@ -125,7 +149,7 @@ The artifacts for this library are published to the popular Bintray JCenter Mave
             <dependency>
                     <groupId>org.immutizer4j</groupId>
                     <artifactId>immutizer4j</artifactId>
-                    <version>0.2.0</version>
+                    <version>0.3.0</version>
             </dependency>
     </dependencies>
 

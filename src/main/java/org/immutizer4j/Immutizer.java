@@ -3,6 +3,7 @@ package org.immutizer4j;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.MapMaker;
 import com.google.common.collect.Sets;
+import lombok.SneakyThrows;
 import lombok.Value;
 import lombok.extern.slf4j.Slf4j;
 
@@ -10,6 +11,8 @@ import java.lang.reflect.*;
 import java.util.Collection;
 import java.util.Set;
 import java.util.concurrent.ConcurrentMap;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * Performs object graph check for immutability
@@ -159,8 +162,8 @@ public class Immutizer {
             result = handleArrays(field, result);
 
             // for custom types, recursively check its own fields
-            // some reflection magic for dealing with arrays vs regular types
-            Class<?> actualType = (field.getType().isArray()) ? field.getType().getComponentType() : field.getType();
+            Class<?> actualType = getActualType(field,result);
+            result = validateIfGenericsReference(field,actualType,result);
 
             if (!isSafeType(actualType)) {
                 result = validateType(actualType, result);
@@ -222,9 +225,64 @@ public class Immutizer {
 
     // standard handler for reporting errors, returns a new immutable ValidationResult instance
     private ValidationResult addError(Field field, ViolationType violationType, ValidationResult result) {
-        ValidationError error = new ValidationError(field.getDeclaringClass(), field.getName(), violationType);
-        log.error("Immutability violation: {}", error);
-        return result.addError(error);
+        // log it as long as it is not marked as @ImmutizerIgnore
+        if (field.getAnnotation(ImmutizerIgnore.class) == null) {
+            ValidationError error = new ValidationError(field.getDeclaringClass(), field.getName(), violationType);
+            log.error("Immutability violation: {}", error);
+            return result.addError(error);
+        } else {
+            log.debug("Skipping immutability violation for field {}.{} due to being marked as @ImmutizerIgnore",
+                    field.getDeclaringClass().getSimpleName(),field.getName());
+            return result;
+        }
     }
+
+    /**
+     * Jumps hoops around various data in Java reflection to find the actual underlying type
+     */
+    @SneakyThrows // checked exception begone!
+    private Class<?> getActualType(Field field, ValidationResult result) {
+        // for custom types, recursively check its own fields
+        // some reflection magic for dealing with arrays vs regular types
+        Class<?> actualType = (field.getType().isArray()) ? field.getType().getComponentType() : field.getType();
+
+        return actualType;
+    }
+
+    @SneakyThrows // checked exception begone!
+    public ValidationResult validateIfGenericsReference(Field field, Class<?> actualType, ValidationResult result) {
+        if (Object.class.equals(actualType)) {
+
+            // let's see if we are dealing with a reference to a generics type
+            // this info is hidden by the JVM in the internal private Field.signature field
+            // the class name is embedded in there, but alas, without the package name (OK, Oracle, that is just stupid)
+            Field signatureField = field.getClass().getDeclaredField(ImmutizerConstants.SIGNATURE_FIELD);
+            signatureField.setAccessible(true); // private is for losers, real programmers get to it anyway
+
+            // try to extract actual class name via
+            String sig = (String) signatureField.get(field);
+            if (sig.startsWith("T") && sig.endsWith(";")) {
+                // OK, reference to a generic type
+                // unfortunately there is no information on the package of the type so we cannot get to it
+                // need to flag this is a violation
+                result = addError(field, ViolationType.UNABLE_TO_DETERMINE_TYPE_DUE_TO_GENERICS_TYPE_ERASURE, result);
+            }
+        }
+
+        return result;
+    }
+
+//    // figures out the standard JavaBean getter method name for a field
+//    private String getGetterName(Field field) {
+//        StringBuilder sb = ThreadLocals.STRINGBUILDER.get().append(ImmutizerConstants.GETTER_PREFIX);
+//
+//        if (field.getName().length() == 1) {
+//            sb.append(field.getName().toUpperCase());
+//        } else {
+//            sb.append(field.getName().substring(0,1).toUpperCase())
+//                    .append(field.getName().substring(1));
+//        }
+//        return sb.toString();
+//    }
 
 }

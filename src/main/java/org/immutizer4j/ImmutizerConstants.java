@@ -18,9 +18,12 @@ class ImmutizerConstants {
      * For performance, automatically interns it in the JVM,
      * lowers memory usage, GC pressure
      */
-    public static final String FIELD_SEPARATOR = ".";
-    public static final String MSG_SEPARATOR = " : ";
-    public static final String NEWLINE = "\n ";
+    static final String FIELD_SEPARATOR = ".";
+    static final String MSG_SEPARATOR = " : ";
+    static final String NEWLINE = "\n ";
+
+    static final String SIGNATURE_FIELD = "signature";
+    static final String GETTER_PREFIX = "get";
 
     /**
      * Types the immutizer recognizes by default as immutable (if flagged as final)

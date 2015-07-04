@@ -30,5 +30,11 @@ public enum ViolationType {
      * Used if we tried to find the generic type, but it may use a wildcard like ?
      * in which case we cannot instantiate it
      */
-    GENERIC_TYPE_WITH_WILDCARD
+    GENERIC_TYPE_WITH_WILDCARD,
+    /**
+     * Sometimes we just can't get the type. In this case we flag it as an error since it is not possible
+     * for us to safely determine immutability (all we have is java.lang.Object)
+     */
+    UNABLE_TO_DETERMINE_TYPE_DUE_TO_GENERICS_TYPE_ERASURE
+
 }
