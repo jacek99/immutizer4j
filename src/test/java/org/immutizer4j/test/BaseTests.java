@@ -145,4 +145,18 @@ public class BaseTests {
         assertTrue(result.toString(),
                 result.toString().contains("org.immutizer4j.test.sample.ParentPojo.paretMutableInt : NON_FINAL_FIELD"));
     }
+
+    @Test
+    public void testRegexPatternReference() {
+        ValidationResult result = defaultImmutizer.getValidationResult(RegexPatternReferencePojo.class);
+
+        assertEquals(false,result.isValid());
+        // there are many errors in there, which is OK
+        assertEquals(20, result.getErrors().size());
+
+        // this is the one we care about, it used to cause StackOverFlow error due to circular reference
+        // now it should be reported only once
+        assertTrue(result.toString(),
+                result.toString().contains("java.util.regex.Pattern$Node.next : NON_FINAL_FIELD"));
+    }
 }

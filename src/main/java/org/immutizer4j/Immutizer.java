@@ -165,7 +165,7 @@ public class Immutizer {
             Class<?> actualType = getActualType(field,result);
             result = validateIfGenericsReference(field,actualType,result);
 
-            if (!isSafeType(actualType)) {
+            if (!isSafeType(actualType) && !isRecursive(field)) {
                 result = validateType(actualType, result);
             }
         }
@@ -221,6 +221,11 @@ public class Immutizer {
             }
         }
         return false;
+    }
+
+    // checks if a field refers recursively to the containing/declaring class
+    private boolean isRecursive(Field field) {
+        return field.getType().equals(field.getDeclaringClass());
     }
 
     // standard handler for reporting errors, returns a new immutable ValidationResult instance
