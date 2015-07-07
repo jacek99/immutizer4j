@@ -133,7 +133,7 @@ The artifacts for this library are published to the popular Bintray JCenter Mave
         jcenter()
     }
 
-    compile "org.immutizer4j:immutizer4j:0.5.0"
+    compile "org.immutizer4j:immutizer4j:0.6.0"
 
 
 ## Maven
@@ -149,7 +149,7 @@ The artifacts for this library are published to the popular Bintray JCenter Mave
             <dependency>
                     <groupId>org.immutizer4j</groupId>
                     <artifactId>immutizer4j</artifactId>
-                    <version>0.5.0</version>
+                    <version>0.6.0</version>
             </dependency>
     </dependencies>
 
