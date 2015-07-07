@@ -20,16 +20,15 @@ import java.util.regex.Pattern;
  * @author Jacek Furmankiewicz
  */
 @Slf4j
-@Value
 public class Immutizer {
 
     // may allow arrays to pass or not (no by default)
-    private boolean strict;
+    private final boolean strict;
 
     // additional types that we were told are immutable
-    private ImmutableSet<Class<?>> safeTypes;
+    private final ImmutableSet<Class<?>> safeTypes;
 
-    private ConcurrentMap<Class<?>,ValidationResult> validationCache =
+    private final ConcurrentMap<Class<?>,ValidationResult> validationCache =
             new MapMaker()
             .concurrencyLevel(Runtime.getRuntime().availableProcessors())
             .initialCapacity(100)
@@ -127,13 +126,18 @@ public class Immutizer {
     }
 
     // performs actual walk down the graph hierarchy starting from the root object
-    private ValidationResult validateType(Class<?> entity) {
-        return validateType(entity, new ValidationResult(ImmutableSet.<ValidationError>of()));
+    private ValidationResult validateType(Class<?> type) {
+        if (!isSafeType(type)) {
+            return validateType(type, new ValidationResult(ImmutableSet.<ValidationError>of()));
+        } else {
+            // safe types do not need to be tested
+            return new ValidationResult(ImmutableSet.<ValidationError>of());
+        }
     }
 
     // performs actual walk down the graph hierarchy within an existing validation process
-    private ValidationResult validateType(Class<?> entity, ValidationResult result) {
-        Class<?> current = entity;
+    private ValidationResult validateType(Class<?> type, ValidationResult result) {
+        Class<?> current = type;
         while (current != null && !current.equals(Object.class)) {
 
             Field[] fields = current.getDeclaredFields();

@@ -159,4 +159,14 @@ public class BaseTests {
         assertTrue(result.toString(),
                 result.toString().contains("java.util.regex.Pattern$Node.next : NON_FINAL_FIELD"));
     }
+
+    /**
+     * Ensure the base types can be sent as a root message themselves
+     */
+    @Test
+    public void testSafeTypes() {
+        assertEquals(true, defaultImmutizer.getValidationResult(String.class).isValid());
+        assertEquals(true, defaultImmutizer.getValidationResult(Integer.class).isValid());
+        assertEquals(true, defaultImmutizer.getValidationResult(int.class).isValid());
+    }
 }
