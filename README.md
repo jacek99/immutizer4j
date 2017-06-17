@@ -1,4 +1,4 @@
-# immutizer4j
+![Immutizer4J](img/logo.png)
 
 A small library to validate immutability of Java object graphs
 
