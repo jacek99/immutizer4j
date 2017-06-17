@@ -8,7 +8,7 @@ buildscript {
 }
 
 task wrapper(type: Wrapper) {
-    gradleVersion = '2.4'
+    gradleVersion = '4.0'
 }
 
 import java.text.SimpleDateFormat
@@ -22,6 +22,7 @@ repositories {
 
 apply plugin: 'java'
 apply plugin: 'idea'
+apply plugin: 'findbugs'
 
 version = globalVersion
 status = version.status
@@ -31,15 +32,14 @@ targetCompatibility = '1.8'
 
 dependencies {
     // Lombok is king, don't code any Java without it
-    compile "org.projectlombok:lombok:1.16.2"
+    compile "org.projectlombok:lombok:1.16.16"
     // JDK++
-    compile 'com.google.guava:guava:18.0'
+    compile 'com.google.guava:guava:22.0'
     // logging
-    compile 'org.slf4j:slf4j-api:1.7.10'
+    compile 'org.slf4j:slf4j-api:1.7.25'
 
     // test support
-
-    testCompile "org.slf4j:slf4j-simple:1.7.10"
+    testCompile "org.slf4j:slf4j-simple:1.7.25"
     testCompile "junit:junit:4.12"
 }
 
@@ -51,6 +51,25 @@ task javadocJar(type: Jar, dependsOn: javadoc) {
     classifier = 'javadoc'
     from javadoc.destinationDir
 }
+
+// code quality
+findbugs {
+    //ignoreFailures = true
+    effort = "max"
+    reportLevel = "medium"
+    includeFilter = file("$rootProject.projectDir/findBugsIncludeFilter.xml")
+    excludeFilter = file("$rootProject.projectDir/findBugsExcludeFilter.xml")
+}
+
+tasks.withType(FindBugs) {
+    reports {
+        xml.enabled false
+        html.enabled true
+    }
+}
+
+check.dependsOn test
+build.dependsOn check
 
 // published projects configuration
 

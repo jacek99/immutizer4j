@@ -3,6 +3,7 @@ package org.immutizer4j;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.MapMaker;
 import com.google.common.collect.Sets;
+import lombok.NonNull;
 import lombok.SneakyThrows;
 import lombok.Value;
 import lombok.extern.slf4j.Slf4j;
@@ -106,23 +107,12 @@ public class Immutizer {
      * @param clazz Entity to check
      * @return Validation result
      */
-    public ValidationResult getValidationResult(Class<?> clazz) {
-        if (clazz != null) {
-
-            if (validationCache.containsKey(clazz)) {
-                // all good, we verified this type before
-                return validationCache.get(clazz);
-            } else {
-                ValidationResult result = validateType(clazz);
-                //remember that it was fine
-                validationCache.putIfAbsent(clazz, result);
-                return result;
-            }
-
-        } else {
-            throw new NullPointerException("clazz was null");
+    public ValidationResult getValidationResult(@NonNull Class<?> clazz) {
+        ValidationResult result = validationCache.get(clazz);
+        if (result == null) {
+            result = validationCache.computeIfAbsent(clazz, c -> validateType(c));
         }
-
+        return result;
     }
 
     // performs actual walk down the graph hierarchy starting from the root object
@@ -209,10 +199,7 @@ public class Immutizer {
     // arrays (can be allowed if we are not running in strict mode)
     private ValidationResult handleArrays(Field field, ValidationResult result) {
         if (field.getType().isArray() && strict) {
-
-            if (strict) {
-                result = addError(field,ViolationType.MUTABLE_ARRAY,result);
-            }
+            result = addError(field,ViolationType.MUTABLE_ARRAY,result);
         }
         return result;
     }
